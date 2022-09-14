@@ -9,10 +9,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import android.widget.RadioButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
+import androidx.databinding.DataBindingUtil
+import com.udacity.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
@@ -22,15 +24,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var notificationManager: NotificationManager
     private lateinit var pendingIntent: PendingIntent
     private lateinit var action: NotificationCompat.Action
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        setSupportActionBar(binding.toolbar)
 
-        registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-
-        custom_button.setOnClickListener {
+        binding.contentLayout.customButton.setOnClickListener {
             download()
         }
     }
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            println("MainActivity.onReceive -- $id -- $downloadID")
         }
     }
 
@@ -53,6 +55,40 @@ class MainActivity : AppCompatActivity() {
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+
+    }
+
+    fun onRadioButtonClicked(view: View) {
+        if (view is RadioButton) {
+            // Is the button now checked?
+            val checked = view.isChecked
+
+            // Check which radio button was clicked
+            when (view.getId()) {
+                R.id.radio_glide ->
+                    if (checked) {
+                        // Pirates are the best
+                    }
+                R.id.radio_loadApp ->
+                    if (checked) {
+                        // Ninjas rule
+                    }
+                R.id.radio_retrofit ->
+                    if (checked) {
+                        // Ninjas rule
+                    }
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(receiver)
     }
 
     companion object {
